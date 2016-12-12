@@ -11,17 +11,19 @@ def get_reward(state):
 	for y in range(state.shape[0]):
 		for x in range(state.shape[1]):
 			reward += state[y,x,0] * state[y,x,1]
-	return reward / (state.shape[0] * state.shape[1])
+	return reward
 
 def get_ndarray(frame, production, num):
 	width, height = len(frame[0]), len(frame)
-	arr = np.zeros((height, width, 3))
+	arr = np.zeros((height*2, width*2, 3))
 	for y in range(height):
 		for x in range(width):
 			player, strength = frame[y][x]
-			arr[y,x,0] = 1.0 if player == num else -1.0
-			arr[y,x,1] = strength / 255.0
-			arr[y,x,2] = production[y][x] / 255.0
+			for dx in [1, 2]:
+				for dy in [1, 2]:
+					arr[y*dy,x*dx,0] = 1.0 if player == num else -1.0
+					arr[y*dy,x*dx,1] = strength / 255.0
+					arr[y*dy,x*dx,2] = production[y][x] / 255.0
 	return arr
 
 def parse_sars(frame, move, nframe, production, num):
@@ -31,8 +33,8 @@ def parse_sars(frame, move, nframe, production, num):
 	for y in range(height):
 		for x in range(width):
 			if frame[y][x][0] > 0.0:
-				state = np.roll(np.roll(arr, -y+8, axis=0), -x+8, axis=1)[:16,:16,:]
-				nstate = np.roll(np.roll(narr, -y+8, axis=0), -x+8, axis=1)[:16,:16,:]
+				state = np.roll(np.roll(arr, -y+15, axis=0), -x+15, axis=1)[:30,:30,:]
+				nstate = np.roll(np.roll(narr, -y+15, axis=0), -x+15, axis=1)[:30,:30,:]
 				yield state, move[y][x], get_reward(nstate), nstate
 
 def parse_file(file):

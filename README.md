@@ -5,3 +5,4 @@ times higher than that of Go".
 
 # References
  - https://www.halite.io/
+ - http://torch.ch/blog/2016/04/30/dueling_dqn.html

@@ -1,11 +1,6 @@
-"""
-This uses a convolutional neural network to implement offline Q-learning.
-===============================================================================
-Copyright 2016, Kevin Zhang <kevz@mit.edu>
-"""
 import tensorflow as tf
 
-x_in = tf.placeholder(tf.float32, shape=(None, 16, 16, 3), name='x_in')
+x_in = tf.placeholder(tf.float32, shape=(None, 30, 30, 3), name='x_in')
 y_exp = tf.placeholder(tf.float32, shape=(None, 5), name='y_exp')
 
 with tf.name_scope('conv1'):
@@ -19,21 +14,31 @@ with tf.name_scope('conv1'):
 
 with tf.name_scope('conv2'):
     W = tf.Variable(tf.random_normal(
-        [4, 4, 16, 32], 
-        stddev=1.0 / tf.sqrt(float(4*4*16))),
+        [8, 8, 16, 32], 
+        stddev=1.0 / tf.sqrt(float(8*8*16))),
     	name='weights'
     )
     h = tf.nn.conv2d(h, W, strides=[1, 1, 1, 1], padding='SAME')
     h = tf.nn.max_pool(h, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    h = tf.nn.relu(tf.reshape(h, [-1, 8*8*32]))
+    h = tf.nn.relu(tf.reshape(h, [-1, 15*15*32]))
 
-with tf.name_scope('output'):
+with tf.name_scope('value'):
     W = tf.Variable(tf.random_normal(
-        [8*8*32, 5], 
-        stddev=1.0 / tf.sqrt(float(8*8*32)), name='weights'
+        [15*15*32, 1], 
+        stddev=1.0 / tf.sqrt(float(15*15*32)), name='weights'
+    ))
+    b = tf.Variable(tf.zeros([1]), name='biases')
+    v_out = tf.matmul(h, W) + b
+
+with tf.name_scope('action'):
+    W = tf.Variable(tf.random_normal(
+        [15*15*32, 5], 
+        stddev=1.0 / tf.sqrt(float(15*15*32)), name='weights'
     ))
     b = tf.Variable(tf.zeros([5]), name='biases')
-    y_out = tf.matmul(h, W) + b
+    a_out = tf.matmul(h, W) + b
+
+y_out = a_out + v_out
 
 mse = tf.reduce_mean(tf.square(y_out - y_exp))
 step = tf.train.RMSPropOptimizer(0.001).minimize(mse)
@@ -43,27 +48,3 @@ stats = tf.summary.merge_all()
 
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
-writer = tf.summary.FileWriter('log', sess.graph)
-
-if __name__ == "__main__":
-	import numpy as np
-	from tqdm import tqdm
-	from data import generator
-
-	def get_yc(s, a, r, ns):
-		yc = sess.run(y_out, feed_dict={x_in: s})
-		yn = sess.run(y_out, feed_dict={x_in: ns})
-		for i in range(yc.shape[0]):
-			yc[a[i]] = r[i] + 0.5 * np.max(yn[i])
-		return yc
-
-	i = 0
-	for epoch in range(32):
-		errs = []
-		for s, a, r, ns in tqdm(generator(batch_size=128)):
-			yc = get_yc(s, a, r, ns)
-			summary, err, _ = sess.run([stats, mse, step], feed_dict={x_in: s, y_exp: yc})
-			writer.add_summary(summary, i)
-			errs.append(err)
-			i += 1
-		print(epoch, sum(errs) / len(errs))
