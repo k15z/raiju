@@ -11,12 +11,12 @@ def get_reward(state):
 	reward = 0.0
 	for y in range(state.shape[0]):
 		for x in range(state.shape[1]):
-			reward += state[y,x,0] # * state[y,x,1]
+			reward += state[y,x,0] * state[y,x,1]
 	return reward
 
-def get_ndarray(frame, production, num, pmove, pframe):
+def get_ndarray(frame, production, num):
 	width, height = len(frame[0]), len(frame)
-	arr = np.zeros((height*2, width*2, 4))
+	arr = np.zeros((height*2, width*2, 3))
 	for y in range(height):
 		for x in range(width):
 			player, strength = frame[y][x]
@@ -28,14 +28,12 @@ def get_ndarray(frame, production, num, pmove, pframe):
 						arr[y*dy,x*dx,0] = -1.0
 					arr[y*dy,x*dx,1] = strength / 255.0
 					arr[y*dy,x*dx,2] = production[y][x] / 255.0
-					if pframe[y][x][0] == num:
-						arr[y*dy,x*dx,3] = pmove[y][x] / 4.0
 	return arr
 
-def parse_sarsa(frame, move, nframe, nmove, production, num, pmove, pframe):
+def parse_sarsa(frame, move, nframe, nmove, production, num):
 	width, height = len(frame[0]), len(frame)
-	arr = get_ndarray(frame, production, num, pmove, pframe)
-	narr = get_ndarray(nframe, production, num, move, frame)
+	arr = get_ndarray(frame, production, num)
+	narr = get_ndarray(nframe, production, num)
 	for y in range(height):
 		for x in range(width):
 			if frame[y][x][0] > 0.0:
@@ -45,36 +43,37 @@ def parse_sarsa(frame, move, nframe, nmove, production, num, pmove, pframe):
 
 def parse_file(file):
 	data = json.load(open(file, "rt"))
+	GAME_LENGTH = 10.0 * (data["width"] * data["height"]) ** 0.5
 	production = data["productions"]
-	for t in range(1, data["num_frames"]-2):
+	for t in range(data["num_frames"]-2):
 		move = data["moves"][t]
 		nmove = data["moves"][t+1]
-		pmove = data["moves"][t-1]
 		frame = data["frames"][t]
 		nframe = data["frames"][t+1]
-		pframe = data["frames"][t-1]
 		for num in range(1, data["num_players"]):
-			for s, a, r, ns, na in parse_sarsa(frame, move, nframe, nmove, production, num, pmove, pframe):
-				yield s, a, r, ns, na
+			for s, a, r, ns, na in parse_sarsa(frame, move, nframe, nmove, production, num):
+				yield s, a, r, ns, na, [t/GAME_LENGTH], [(t+1.0)/GAME_LENGTH]
 
-def generator(batch_size=32):
+def generator(batch_size=128):
 	files = glob(DATA_DIR + "**/*.hlt")
 	random.shuffle(files)
-	S, A, R, NS, NA = [], [], [], [], []
+	S, A, R, NS, NA, T, NT = [], [], [], [], [], [], []
 	for file in files:
-		for s, a, r, ns, na in parse_file(file):
+		for s, a, r, ns, na, t, nt in parse_file(file):
 			S.append(s)
 			A.append(a)
 			R.append(r)
 			NS.append(ns)
 			NA.append(na)
+			T.append(t)
+			NT.append(nt)
 			if len(S) == batch_size:
-				yield list(map(np.array, [S, A, R, NS, NA]))
-				S, A, R, NS, NA = [], [], [], [], []
+				yield list(map(np.array, [S, A, R, NS, NA, T, NT]))
+				S, A, R, NS, NA, T, NT = [], [], [], [], [], [], []
 
 if __name__ == "__main__":
 	gen = generator()
 	i = 0
-	for s, a, r, ns, na in tqdm.tqdm(gen):
+	for s, a, r, ns, na, t, nt in tqdm.tqdm(gen):
 		i += 1
 	print(i)

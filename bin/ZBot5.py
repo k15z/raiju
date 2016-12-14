@@ -40,6 +40,7 @@ while True:
     actions = get_actions(states)
 
     moves = []
+    prev_moves = {}
     for i in range(len(states)):
         square = squares[i]
         action = actions[i]
@@ -48,6 +49,7 @@ while True:
             prev_moves[(square.x, square.y)] = action
         else:
             if square.strength > 0:
-                moves.append(Move(square, random.choice((NORTH, EAST, SOUTH, WEST, STILL))))
+                action = random.choice((NORTH, EAST, SOUTH, WEST, STILL))
+                moves.append(Move(square, action))
                 prev_moves[(square.x, square.y)] = action
     hlt.send_frame(moves)
