@@ -11,17 +11,17 @@ with tf.name_scope('conv1'):
         name='weights'
     )
     h = tf.nn.conv2d(x_in, W, strides=[1, 1, 1, 1], padding='SAME')
-    h = tf.nn.elu(h)
+    h = tf.nn.relu(h)
 
 with tf.name_scope('conv2'):
     W = tf.Variable(tf.random_normal(
-        [6, 6, 8, 16], 
-        stddev=1.0 / tf.sqrt(float(6*6*8))),
+        [8, 8, 8, 16], 
+        stddev=1.0 / tf.sqrt(float(8*8*8))),
         name='weights'
     )
     h = tf.nn.conv2d(h, W, strides=[1, 1, 1, 1], padding='SAME')
     h = tf.nn.max_pool(h, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    h = tf.nn.elu(tf.reshape(h, [-1, 15*15*16]))
+    h = tf.nn.relu(tf.reshape(h, [-1, 15*15*16]))
 
 with tf.name_scope('value'):
     W = tf.Variable(tf.random_normal(
@@ -42,7 +42,7 @@ with tf.name_scope('action'):
 y_out = a_out + v_out
 
 mse = tf.reduce_mean(tf.square(y_out - y_exp))
-step = tf.train.GradientDescentOptimizer(0.001).minimize(mse)
+step = tf.train.RMSPropOptimizer(0.001).minimize(mse)
 
 tf.summary.scalar('mse', mse)
 stats = tf.summary.merge_all()
@@ -51,7 +51,7 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
-saver.restore(sess, "./session.ckpt")
+saver.restore(sess, "./zbot3/session.ckpt")
 
 def get_actions(states):
     y_result = sess.run(y_out, feed_dict={x_in: states})

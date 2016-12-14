@@ -1,6 +1,7 @@
 import hlt
 from hlt import NORTH, EAST, SOUTH, WEST, STILL, Move, Square
 import random
+import random
 import numpy as np
 from zbot3_model import get_actions
 
@@ -23,6 +24,10 @@ while True:
                     else: board[square.y*dy,square.x*dx,0] = -1.0
                     board[square.y*dy,square.x*dx,1] = square.strength / 255.0
                     board[square.y*dy,square.x*dx,2] = square.production / 255.0
+    MAX_SQUARES = 256
+    if len(squares) > MAX_SQUARES:
+        random.shuffle(squares)
+        squares = squares[:MAX_SQUARES]
 
     states = []
     for square in squares:
