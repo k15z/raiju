@@ -5,6 +5,11 @@ times higher than that of Go".
 
 ![ZBot3 (Raiju) vs ZBot3 (Raiju)](demo.gif)
 
-# References
+## Proposals
+ - Provide inter-piece communication
+ - Include board size, time to last match
+ - Distinguish between enemy squares/pieces
+
+## References
  - https://www.halite.io/
  - http://torch.ch/blog/2016/04/30/dueling_dqn.html
