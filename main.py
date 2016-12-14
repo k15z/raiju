@@ -8,7 +8,7 @@ def get_yc(s, a, r, ns, na):
 	yc = sess.run(y_out, feed_dict={x_in: s})
 	yn = sess.run(y_out, feed_dict={x_in: ns})
 	for i in range(yc.shape[0]):
-		yc[a[i]] = r[i] + 0.5 * yn[i,na[i]]
+		yc[a[i]] = r[i] + 0.9 * yn[i,na[i]]
 	return yc
 
 writer = tf.summary.FileWriter('log', sess.graph)

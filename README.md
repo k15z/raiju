@@ -6,6 +6,7 @@ times higher than that of Go".
 ![ZBot3 (Raiju) vs ZBot3 (Raiju)](demo.gif)
 
 ## Proposals
+ - Information about prev. move.
  - Provide inter-piece communication
  - Include board size, time to last match
  - Distinguish between enemy squares/pieces

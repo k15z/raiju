@@ -1,12 +1,12 @@
 import tensorflow as tf
 
-x_in = tf.placeholder(tf.float32, shape=(None, 36, 36, 3), name='x_in')
+x_in = tf.placeholder(tf.float32, shape=(None, 36, 36, 4), name='x_in')
 y_exp = tf.placeholder(tf.float32, shape=(None, 5), name='y_exp')
 
 with tf.name_scope('conv1'):
     W = tf.Variable(tf.random_normal(
-        [4, 4, 3, 16], 
-        stddev=1.0 / tf.sqrt(float(4*4*3))),
+        [4, 4, 4, 16], 
+        stddev=1.0 / tf.sqrt(float(4*4*4))),
     	name='weights'
     )
     h = tf.nn.conv2d(x_in, W, strides=[1, 1, 1, 1], padding='SAME')

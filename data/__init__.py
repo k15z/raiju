@@ -11,12 +11,12 @@ def get_reward(state):
 	reward = 0.0
 	for y in range(state.shape[0]):
 		for x in range(state.shape[1]):
-			reward += state[y,x,0] * state[y,x,1]
+			reward += state[y,x,0] # * state[y,x,1]
 	return reward
 
-def get_ndarray(frame, production, num):
+def get_ndarray(frame, production, num, pmove, pframe):
 	width, height = len(frame[0]), len(frame)
-	arr = np.zeros((height*2, width*2, 3))
+	arr = np.zeros((height*2, width*2, 4))
 	for y in range(height):
 		for x in range(width):
 			player, strength = frame[y][x]
@@ -28,12 +28,14 @@ def get_ndarray(frame, production, num):
 						arr[y*dy,x*dx,0] = -1.0
 					arr[y*dy,x*dx,1] = strength / 255.0
 					arr[y*dy,x*dx,2] = production[y][x] / 255.0
+					if pframe[y][x][0] == num:
+						arr[y*dy,x*dx,3] = pmove[y][x] / 4.0
 	return arr
 
-def parse_sarsa(frame, move, nframe, nmove, production, num):
+def parse_sarsa(frame, move, nframe, nmove, production, num, pmove, pframe):
 	width, height = len(frame[0]), len(frame)
-	arr = get_ndarray(frame, production, num)
-	narr = get_ndarray(nframe, production, num)
+	arr = get_ndarray(frame, production, num, pmove, pframe)
+	narr = get_ndarray(nframe, production, num, move, frame)
 	for y in range(height):
 		for x in range(width):
 			if frame[y][x][0] > 0.0:
@@ -44,13 +46,15 @@ def parse_sarsa(frame, move, nframe, nmove, production, num):
 def parse_file(file):
 	data = json.load(open(file, "rt"))
 	production = data["productions"]
-	for t in range(data["num_frames"]-2):
+	for t in range(1, data["num_frames"]-2):
 		move = data["moves"][t]
 		nmove = data["moves"][t+1]
+		pmove = data["moves"][t-1]
 		frame = data["frames"][t]
 		nframe = data["frames"][t+1]
+		pframe = data["frames"][t-1]
 		for num in range(1, data["num_players"]):
-			for s, a, r, ns, na in parse_sarsa(frame, move, nframe, nmove, production, num):
+			for s, a, r, ns, na in parse_sarsa(frame, move, nframe, nmove, production, num, pmove, pframe):
 				yield s, a, r, ns, na
 
 def generator(batch_size=32):

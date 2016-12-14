@@ -3,7 +3,7 @@ from hlt import NORTH, EAST, SOUTH, WEST, STILL, Move, Square
 import random
 import random
 import numpy as np
-from zbot3_model import get_actions
+from zbot2_model import get_actions
 
 myID, game_map = hlt.get_init()
 hlt.send_init("ZBot2")
