@@ -42,7 +42,7 @@ with tf.name_scope('action'):
 y_out = a_out + v_out
 
 mse = tf.reduce_mean(tf.square(y_out - y_exp))
-step = tf.train.RMSPropOptimizer(0.01).minimize(mse)
+step = tf.train.GradientDescentOptimizer(0.001).minimize(mse)
 
 tf.summary.scalar('mse', mse)
 stats = tf.summary.merge_all()

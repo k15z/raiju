@@ -14,13 +14,13 @@ def get_yc(s, a, r, ns):
 	yc = sess.run(y_out, feed_dict={x_in: s})
 	yn = sess.run(y_out, feed_dict={x_in: ns})
 	for i in range(yc.shape[0]):
-		yc[a[i]] = r[i] + 0.5 * np.max(yn[i])
+		yc[a[i]] = r[i] + 0.9 * np.max(yn[i])
 	return yc
 
 i = 0
-for epoch in range(16):
+for epoch in range(32):
 	errs = []
-	for s, a, r, ns in tqdm(generator(batch_size=128)):
+	for s, a, r, ns in tqdm(generator(batch_size=256)):
 		yc = get_yc(s, a, r, ns)
 		summary, err, _ = sess.run([stats, mse, step], feed_dict={x_in: s, y_exp: yc})
 		writer.add_summary(summary, i)

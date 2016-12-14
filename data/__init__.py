@@ -21,7 +21,10 @@ def get_ndarray(frame, production, num):
 			player, strength = frame[y][x]
 			for dx in [1, 2]:
 				for dy in [1, 2]:
-					arr[y*dy,x*dx,0] = 1.0 if player == num else -1.0
+					if player == num:
+						arr[y*dy,x*dx,0] = 1.0
+					elif player != 0:
+						arr[y*dy,x*dx,0] = -1.0
 					arr[y*dy,x*dx,1] = strength / 255.0
 					arr[y*dy,x*dx,2] = production[y][x] / 255.0
 	return arr
@@ -44,7 +47,7 @@ def parse_file(file):
 		move = data["moves"][t]
 		frame = data["frames"][t]
 		nframe = data["frames"][t+1]
-		for num in range(data["num_players"]):
+		for num in range(1, data["num_players"]):
 			for s, a, r, ns in parse_sars(frame, move, nframe, production, num):
 				yield s, a, r, ns
 
