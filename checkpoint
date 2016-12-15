@@ -1,3 +1,0 @@
-model_checkpoint_path: "session.1.ckpt"
-all_model_checkpoint_paths: "session.0.ckpt"
-all_model_checkpoint_paths: "session.1.ckpt"
