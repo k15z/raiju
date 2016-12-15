@@ -54,7 +54,7 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
-saver.restore(sess, "./raiju/session.ckpt")
+saver.restore(sess, "./raiju/session.1.ckpt")
 
 def get_actions(states, times):
     y_result = sess.run(y_out, feed_dict={x_in: states, t_in: times})

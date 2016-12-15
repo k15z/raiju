@@ -45,7 +45,9 @@ def parse_file(file):
 	data = json.load(open(file, "rt"))
 	GAME_LENGTH = 10.0 * (data["width"] * data["height"]) ** 0.5
 	production = data["productions"]
-	for t in range(data["num_frames"]-2):
+	times = list(range(data["num_frames"]-2))
+	random.shuffle(times)
+	for t in times:
 		move = data["moves"][t]
 		nmove = data["moves"][t+1]
 		frame = data["frames"][t]

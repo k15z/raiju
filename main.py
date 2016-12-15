@@ -13,7 +13,7 @@ def get_yc(s, a, r, ns, na, t, nt):
 
 writer = tf.summary.FileWriter('log', sess.graph)
 saver = tf.train.Saver()
-#saver.restore(sess, "./session.ckpt")
+#saver.restore(sess, "./session.0.ckpt")
 
 i = 0
 for epoch in range(8):
@@ -23,6 +23,8 @@ for epoch in range(8):
 		summary, err, _ = sess.run([stats, mse, step], feed_dict={x_in: s, y_exp: yc, t_in: t})
 		writer.add_summary(summary, i)
 		errs.append(err)
+		if i % 1000 == 0:
+			saver.save(sess, "./session." + str(epoch) + ".ckpt")
 		i += 1
 	print(epoch, sum(errs) / len(errs))
-	saver.save(sess, "./session.ckpt")
+	saver.save(sess, "./session." + str(epoch) + ".ckpt")
